@@ -35,12 +35,21 @@
     if ((self = [super init]))
     {
         _manager = SDWebImageManager.new;
-        _manager.imageDownloader.maxConcurrentDownloads = 3;
         _options = SDWebImageLowPriority;
+        self.maxConcurrentDownloads = 3;
     }
     return self;
 }
 
+- (void)setMaxConcurrentDownloads:(NSUInteger)maxConcurrentDownloads
+{
+    self.manager.imageDownloader.maxConcurrentDownloads = maxConcurrentDownloads;
+}
+
+- (NSUInteger)maxConcurrentDownloads
+{
+    return self.manager.imageDownloader.maxConcurrentDownloads;
+}
 
 - (void)startPrefetchingAtIndex:(NSUInteger)index
 {

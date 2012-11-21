@@ -34,7 +34,7 @@ typedef enum
     SDWebImageProgressiveDownload = 1 << 3
 } SDWebImageOptions;
 
-typedef void(^SDWebImageCompletedBlock)(UIImage *image, NSError *error, BOOL fromCache);
+typedef void(^SDWebImageCompletedBlock)(UIImage *image, NSError *error, SDImageCacheType cacheType);
 typedef void(^SDWebImageCompletedWithFinishedBlock)(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished);
 
 

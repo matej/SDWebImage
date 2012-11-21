@@ -234,26 +234,26 @@
                 {
                     UIImage *image = [UIImage decodedImageWithImage:SDScaledImageForPath(self.request.URL.absoluteString, [UIImage imageWithCGImage:partialImageRef])];
                     CGImageRelease(partialImageRef);
-					dispatch_async(dispatch_get_main_queue(), ^
-					{
-						if (self.completedBlock)
-						{
-							self.completedBlock(image, nil, nil, NO);
-						}
-					});
+                    dispatch_async(dispatch_get_main_queue(), ^
+                    {
+                        if (self.completedBlock)
+                        {
+                            self.completedBlock(image, nil, nil, NO);
+                        }
+                    });
                 }
             }
 
             CFRelease(imageSource);
         }
-		NSUInteger received = self.imageData.length;
-		dispatch_async(dispatch_get_main_queue(), ^
-		{
-			if (self.progressBlock)
-			{
-				self.progressBlock(received, self.expectedSize);
-			}
-		});
+        NSUInteger received = self.imageData.length;
+        dispatch_async(dispatch_get_main_queue(), ^
+        {
+            if (self.progressBlock)
+            {
+                self.progressBlock(received, self.expectedSize);
+            }
+        });
     });
 }
 

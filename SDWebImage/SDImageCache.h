@@ -11,18 +11,18 @@
 
 enum SDImageCacheType
 {
-	/**
-	 * The image wasn't available the SDWebImage caches, but was downloaded from the web.
-	 */
-	SDImageCacheTypeNone = 0,
-	/**
-	 * The image was obtained from the disk cache.
-	 */
-	SDImageCacheTypeDisk,
-	/**
-	 * The image was obtained from the disk cache.
-	 */
-	SDImageCacheTypeMemory
+    /**
+     * The image wasn't available the SDWebImage caches, but was downloaded from the web.
+     */
+    SDImageCacheTypeNone = 0,
+    /**
+     * The image was obtained from the disk cache.
+     */
+    SDImageCacheTypeDisk,
+    /**
+     * The image was obtained from the disk cache.
+     */
+    SDImageCacheTypeMemory
 };
 typedef enum SDImageCacheType SDImageCacheType;
 
