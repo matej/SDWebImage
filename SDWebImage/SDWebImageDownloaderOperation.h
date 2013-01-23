@@ -19,7 +19,6 @@
                 queue:(dispatch_queue_t)queue
               options:(SDWebImageDownloaderOptions)options
              progress:(SDWebImageDownloaderProgressBlock)progressBlock
-            completed:(SDWebImageDownloaderCompletedBlock)completedBlock
-            cancelled:(void (^)())cancelBlock;
+            completed:(SDWebImageDownloaderCompletedBlock)completedBlock;
 
 @end

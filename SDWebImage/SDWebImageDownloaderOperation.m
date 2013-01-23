@@ -14,7 +14,6 @@
 
 @property (copy, nonatomic) SDWebImageDownloaderProgressBlock progressBlock;
 @property (copy, nonatomic) SDWebImageDownloaderCompletedBlock completedBlock;
-@property (copy, nonatomic) void (^cancelBlock)();
 
 @property (assign, nonatomic, getter = isExecuting) BOOL executing;
 @property (assign, nonatomic, getter = isFinished) BOOL finished;
@@ -30,7 +29,7 @@
     size_t width, height;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request queue:(dispatch_queue_t)queue options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock cancelled:(void (^)())cancelBlock
+- (id)initWithRequest:(NSURLRequest *)request queue:(dispatch_queue_t)queue options:(SDWebImageDownloaderOptions)options progress:(void (^)(NSUInteger, long long))progressBlock completed:(void (^)(UIImage *, NSData *, NSError *, BOOL))completedBlock
 {
     if ((self = [super init]))
     {
@@ -39,7 +38,6 @@
         _options = options;
         _progressBlock = [progressBlock copy];
         _completedBlock = [completedBlock copy];
-        _cancelBlock = [cancelBlock copy];
         _executing = NO;
         _finished = NO;
         _expectedSize = 0;
@@ -91,7 +89,6 @@
 {
     if (self.isFinished) return;
     [super cancel];
-    if (self.cancelBlock) self.cancelBlock();
 
     if (self.connection)
     {
@@ -118,7 +115,6 @@
 {
     dispatch_async(dispatch_get_main_queue(), ^
     {
-        self.cancelBlock = nil;
         self.completedBlock = nil;
         self.progressBlock = nil;
         self.connection = nil;
