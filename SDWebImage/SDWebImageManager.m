@@ -76,6 +76,7 @@
     }
 
     __block SDWebImageCombinedOperation *operation = SDWebImageCombinedOperation.new;
+    __weak SDWebImageCombinedOperation *woperation = operation;
     
     if (!url || !completedBlock || (!(options & SDWebImageRetryFailed) && [self.failedURLs containsObject:url]))
     {
@@ -100,7 +101,7 @@
             SDWebImageDownloaderOptions downloaderOptions = 0;
             if (options & SDWebImageLowPriority) downloaderOptions |= SDWebImageDownloaderLowPriority;
             if (options & SDWebImageProgressiveDownload) downloaderOptions |= SDWebImageDownloaderProgressiveDownload;
-            __block id<SDWebImageOperation> subOperation = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *data, NSError *error, BOOL finished)
+            id<SDWebImageOperation> subOperation = [self.imageDownloader downloadImageWithURL:url options:downloaderOptions progress:progressBlock completed:^(UIImage *downloadedImage, NSData *data, NSError *error, BOOL finished)
             {
                 completedBlock(downloadedImage, error, SDImageCacheTypeNone, finished);
 
@@ -118,7 +119,7 @@
 
                 if (finished)
                 {
-                    [self.runningOperations removeObject:operation];
+                    [self.runningOperations removeObject:woperation];
                 }
             }];
             operation.cancelBlock = ^{[subOperation cancel];};
