@@ -144,8 +144,8 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
                  }
              }];
              [wself.downloadQueue addOperation:downloadOperation];
-             observerOperation.downloadOperation = downloadOperation;
          }
+         observerOperation.downloadOperation = downloadOperation;
      }];
 
     observerOperation.cancelBlock = ^BOOL
@@ -173,9 +173,9 @@ NSString *const SDWebImageDownloadStopNotification = @"SDWebImageDownloadStopNot
         // Handle single download of simultaneous download request for the same URL
         NSMutableArray *callbacksForURL = self.URLCallbacks[url];
         [callbacksForURL addObject:observerOperation];
-    });
 
-    createCallback(existingDownload);
+        createCallback(existingDownload);
+    });
 }
 
 - (NSArray *)observerOperationsForURL:(NSURL *)url
