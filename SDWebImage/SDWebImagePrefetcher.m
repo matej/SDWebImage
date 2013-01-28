@@ -90,7 +90,7 @@
             [subset addObject:urls[lowIndex]];
         }
         NSUInteger upIndex = index + i;
-        if (upIndex < count - 1) {
+        if (upIndex < count) {
             [subset addObject:urls[upIndex]];
         }
     }
