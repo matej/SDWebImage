@@ -114,6 +114,11 @@ typedef void(^SDWebImageCompletedWithFinishedBlock)(UIImage *image, NSError *err
                                  completed:(SDWebImageCompletedWithFinishedBlock)completedBlock;
 
 /**
+ * Cancel a specific operation and remove it from the current operations list
+ */
+- (void)cancelOperation:(id<SDWebImageOperation>)operation;
+
+/**
  * Cancel all current opreations
  */
 - (void)cancelAll;

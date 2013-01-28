@@ -129,6 +129,12 @@
     return operation;
 }
 
+- (void)cancelOperation:(id<SDWebImageOperation>)operation
+{
+    [operation cancel];
+    [self.runningOperations removeObject:operation];
+}
+
 - (void)cancelAll
 {
     [self.runningOperations makeObjectsPerformSelector:@selector(cancel)];
