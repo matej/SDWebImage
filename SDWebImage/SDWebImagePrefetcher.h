@@ -15,15 +15,9 @@
 @interface SDWebImagePrefetcher : NSObject
 
 /**
- * Maximum number of URLs to prefetch at the same time. Defaults to 3.
- */
-@property (nonatomic, assign) NSUInteger maxConcurrentDownloads;
-
-/**
  * SDWebImageOptions for prefetcher. Defaults to SDWebImageLowPriority.
  */
 @property (nonatomic, assign) SDWebImageOptions options;
-
 
 /**
  * Return the global image prefetcher instance.
@@ -31,14 +25,15 @@
 + (SDWebImagePrefetcher *)sharedImagePrefetcher;
 
 /**
- * Assign list of URLs to let SDWebImagePrefetcher to queue the prefetching,
- * currently one image is downloaded at a time,
- * and skips images for failed downloads and proceed to the next image in the list
- *
- * @param urls list of URLs to prefetch
+ * Prefetches the given list of urls.
  */
 - (void)prefetchURLs:(NSArray *)urls;
 
+/**
+ * Prefetches a subset of the given list of urls. Loads urls on the interval [index-extent, index+extent].
+ * Usefull for preloading a scrollable list of images from the current user position in both directions. 
+ */
+- (void)prefetchURLs:(NSArray *)urls startIndex:(NSUInteger)index extent:(NSUInteger)extent;
 
 /**
  * Remove and cancel queued list

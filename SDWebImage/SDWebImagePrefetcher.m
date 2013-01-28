@@ -12,11 +12,7 @@
 @interface SDWebImagePrefetcher ()
 
 @property (strong, nonatomic) SDWebImageManager *manager;
-@property (strong, nonatomic) NSArray *prefetchURLs;
-@property (assign, nonatomic) NSUInteger requestedCount;
-@property (assign, nonatomic) NSUInteger skippedCount;
-@property (assign, nonatomic) NSUInteger finishedCount;
-@property (assign, nonatomic) NSTimeInterval startedTime;
+@property (strong, nonatomic) NSMutableDictionary *activeOperations;
 
 @end
 
@@ -34,81 +30,77 @@
 {
     if ((self = [super init]))
     {
-        _manager = SDWebImageManager.new;
+        _manager = [SDWebImageManager new];
+        _activeOperations = [NSMutableDictionary new];
         _options = SDWebImageLowPriority;
-        self.maxConcurrentDownloads = 3;
     }
     return self;
 }
 
-- (void)setMaxConcurrentDownloads:(NSUInteger)maxConcurrentDownloads
-{
-    self.manager.imageDownloader.maxConcurrentDownloads = maxConcurrentDownloads;
-}
-
-- (NSUInteger)maxConcurrentDownloads
-{
-    return self.manager.imageDownloader.maxConcurrentDownloads;
-}
-
-- (void)startPrefetchingAtIndex:(NSUInteger)index
-{
-    if (index >= self.prefetchURLs.count) return;
-    self.requestedCount++;
-    [self.manager downloadWithURL:self.prefetchURLs[index] options:self.options progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished)
-    {
-        if (!finished) return;
-        self.finishedCount++;
-
-        if (image)
-        {
-            NSLog(@"Prefetched %d out of %d", self.finishedCount, self.prefetchURLs.count);
-        }
-        else
-        {
-            NSLog(@"Prefetched %d out of %d (Failed)", self.finishedCount, [self.prefetchURLs count]);
-
-            // Add last failed
-            self.skippedCount++;
-        }
-
-        if (self.prefetchURLs.count > self.requestedCount)
-        {
-            [self startPrefetchingAtIndex:self.requestedCount];
-        }
-        else if (self.finishedCount == self.requestedCount)
-        {
-            [self reportStatus];
-        }
-    }];
-}
-
-- (void)reportStatus
-{
-    NSUInteger total = [self.prefetchURLs count];
-    NSLog(@"Finished prefetching (%d successful, %d skipped, timeElasped %.2f)", total - self.skippedCount, self.skippedCount, CFAbsoluteTimeGetCurrent() - self.startedTime);
-}
-
 - (void)prefetchURLs:(NSArray *)urls
 {
-    [self cancelPrefetching]; // Prevent duplicate prefetch request
-    self.startedTime = CFAbsoluteTimeGetCurrent();
-    self.prefetchURLs = urls;
-
-    // Starts prefetching from the very first image on the list with the max allowed concurrency
-    NSUInteger listCount = self.prefetchURLs.count;
-    for (NSUInteger i = 0; i < self.maxConcurrentDownloads && self.requestedCount < listCount; i++)
+    NSSet *urlsSet = [NSSet setWithArray:urls];
+    NSMutableDictionary *activeOperations = self.activeOperations;
+    SDWebImageManager *manager = self.manager;
+    
+    // Cancel active urls that are no longer relevant, butl leave others intact
+    NSMutableSet *obsoleteUrls = [NSMutableSet setWithArray:[activeOperations allKeys]];
+    [obsoleteUrls minusSet:urlsSet];
+    for (NSURL *url in obsoleteUrls)
     {
-        [self startPrefetchingAtIndex:i];
+        id<SDWebImageOperation> operation = activeOperations[url];
+        [manager cancelOperation:operation];
+        [activeOperations removeObjectForKey:url];
     }
+    
+    // Add new urls
+    for (NSURL *url in urls)
+    {
+        id<SDWebImageOperation> operation = activeOperations[url];
+        if (!operation)
+        {
+            __block BOOL completed = NO;
+            operation = [manager downloadWithURL:url options:self.options progress:nil completed:
+            ^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished)
+            {
+                if (finished)
+                {
+                    [activeOperations removeObjectForKey:url];
+                    completed = YES;
+                }
+            }];
+            if (!completed) activeOperations[url] = operation;
+            
+        }
+    }
+}
+
+- (void)prefetchURLs:(NSArray *)urls startIndex:(NSUInteger)index extent:(NSUInteger)extent
+{
+    NSUInteger count = [urls count];
+    NSMutableArray *subset = [NSMutableArray arrayWithCapacity:2*extent+1];
+    
+    if (index < count) {
+        [subset addObject:urls[index]];
+    }
+    
+    for (NSUInteger i = 1; i <= extent; i++) {
+        NSInteger lowIndex = (NSInteger)index - (NSInteger)i;
+        if (lowIndex >= 0) {
+            [subset addObject:urls[lowIndex]];
+        }
+        NSUInteger upIndex = index + i;
+        if (upIndex < count - 1) {
+            [subset addObject:urls[upIndex]];
+        }
+    }
+    
+    [self prefetchURLs:subset];
 }
 
 - (void)cancelPrefetching
 {
-    self.prefetchURLs = nil;
-    self.skippedCount = 0;
-    self.requestedCount = 0;
-    self.finishedCount = 0;
+    [self.activeOperations removeAllObjects];
     [self.manager cancelAll];
 }
 
